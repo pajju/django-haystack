@@ -118,7 +118,7 @@ class SearchIndex(threading.local):
         """
         return NotImplementedError("You must provide a 'model' method for the '%r' index." % self)
 
-    def index_queryset(self, using):
+    def index_queryset(self, using=None):
         """
         Get the default QuerySet to index when doing a full update.
 
@@ -126,14 +126,14 @@ class SearchIndex(threading.local):
         """
         return self.get_model()._default_manager.all()
 
-    def read_queryset(self):
+    def read_queryset(self, using=None):
         """
         Get the default QuerySet for read actions.
 
         Subclasses can override this method to work with other managers.
         Useful when working with default managers that filter some objects.
         """
-        return self.index_queryset()
+        return self.index_queryset(using=using)
 
     def prepare(self, obj):
         """
