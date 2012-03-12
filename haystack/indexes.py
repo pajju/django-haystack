@@ -204,7 +204,7 @@ class SearchIndex(threading.local):
         used. Default relies on the routers to decide which backend should
         be used.
         """
-        self._get_backend(using).update(self, self.index_queryset())
+        self._get_backend(using).update(self, self.index_queryset(using=using))
 
     def update_object(self, instance, using=None, **kwargs):
         """
