@@ -118,7 +118,7 @@ class SearchIndex(threading.local):
         """
         return NotImplementedError("You must provide a 'model' method for the '%r' index." % self)
 
-    def index_queryset(self):
+    def index_queryset(self, using):
         """
         Get the default QuerySet to index when doing a full update.
 
