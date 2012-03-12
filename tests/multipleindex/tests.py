@@ -1,10 +1,14 @@
+import os
 import shutil
+
 from django.conf import settings
 from django.test import TestCase
+
 from haystack import connections, connection_router
 from haystack.exceptions import NotHandled
 from haystack.query import SearchQuerySet
 from haystack.utils.loading import UnifiedIndex
+
 from multipleindex.search_indexes import FooIndex
 from multipleindex.models import Foo, Bar
 
@@ -17,6 +21,7 @@ class MultipleIndexTestCase(TestCase):
         self.bi = self.ui.get_index(Bar)
         self.solr_backend = connections['default'].get_backend()
         self.whoosh_backend = connections['whoosh'].get_backend()
+        self.filtered_whoosh_backend = connections['filtered_whoosh'].get_backend()
 
         foo_1 = Foo.objects.create(
             title='Haystack test',
@@ -47,7 +52,11 @@ class MultipleIndexTestCase(TestCase):
         self.fi.clear()
         self.bi.clear()
         # Because Whoosh doesn't clean up its mess.
-        shutil.rmtree(settings.HAYSTACK_CONNECTIONS['whoosh']['PATH'])
+        for p in (settings.HAYSTACK_CONNECTIONS['whoosh']['PATH'],
+                  settings.HAYSTACK_CONNECTIONS['filtered_whoosh']['PATH']):
+            if os.path.exists(p):
+                shutil.rmtree(p)
+
         super(MultipleIndexTestCase, self).setUp()
 
     def test_index_update_object_using(self):
@@ -173,3 +182,14 @@ class MultipleIndexTestCase(TestCase):
 
         # Should error, since it's not present.
         self.assertRaises(NotHandled, wui.get_index, Bar)
+
+    def test_filtered_index_update(self):
+        for i in ('whoosh', 'filtered_whoosh'):
+            self.fi.clear(using=i)
+            self.fi.update(using=i)
+
+        results = self.whoosh_backend.search('foo')
+        self.assertEqual(results['hits'], 2)
+
+        results = self.filtered_whoosh_backend.search('foo')
+        self.assertEqual(results['hits'], 1, "Filtered backend should only contain one record")

@@ -15,5 +15,10 @@ HAYSTACK_CONNECTIONS = {
         'PATH': os.path.join('tmp', 'test_whoosh_query'),
         'EXCLUDED_INDEXES': ['multipleindex.search_indexes.BarIndex'],
     },
+    'filtered_whoosh': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join('tmp', 'test_filtered_whoosh'),
+        'EXCLUDED_INDEXES': ['multipleindex.search_indexes.BarIndex'],
+    },
 }
 
